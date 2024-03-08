@@ -1,4 +1,5 @@
 .idea/
 target/
+local-storage/
 *.iml
 .DS_Store

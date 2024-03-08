@@ -12,6 +12,7 @@
     <modules>
         <module>crypto-messenger-coder</module>
         <module>crypto-messenger-server</module>
+        <module>crypto-messenger-desktop</module>
     </modules>
 
     <properties>

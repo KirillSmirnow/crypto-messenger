@@ -4,6 +4,8 @@ import cryptomessenger.server.service.UserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 import static java.util.UUID.randomUUID;
 
 @Service
@@ -26,6 +28,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getByUsername(String username) {
         return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserException("User not found"));
+    }
+
+    @Override
+    public User getById(UUID id) {
+        return userRepository.findById(id)
                 .orElseThrow(() -> new UserException("User not found"));
     }
 }
