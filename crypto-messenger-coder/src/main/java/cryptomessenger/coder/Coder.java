@@ -1,8 +1,20 @@
 package cryptomessenger.coder;
 
+import lombok.Builder;
+import lombok.Data;
+
 public interface Coder {
 
-    byte[] encode(byte[] key, byte[] content);
+    Message encode(Message message, Key key);
 
-    byte[] decode(byte[] key, byte[] content);
+    Message decode(Message message, Key key);
+
+    KeyPair generateKeyPair();
+
+    @Data
+    @Builder
+    class KeyPair {
+        private final Key privateKey;
+        private final Key publicKey;
+    }
 }
