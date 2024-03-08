@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      database: main
+      auto-index-creation: true
