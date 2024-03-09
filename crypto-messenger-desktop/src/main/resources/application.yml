@@ -1,5 +1,5 @@
 app:
-  server-base-url: http://localhost:8080
+  server-base-url: http://164.90.184.120
 spring:
   main:
     web-application-type: none

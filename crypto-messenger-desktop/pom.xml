@@ -7,10 +7,14 @@
     <parent>
         <groupId>org.example</groupId>
         <artifactId>crypto-messenger</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>crypto-messenger-desktop</artifactId>
+
+    <properties>
+        <iconType>png</iconType>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -47,6 +51,41 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/app</outputDirectory>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.panteleyev</groupId>
+                <artifactId>jpackage-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>jpackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- Build -->
+                    <input>${project.build.directory}/app</input>
+                    <mainJar>${project.build.finalName}.jar</mainJar>
+                    <destination>${project.build.directory}</destination>
+
+                    <!-- App -->
+                    <name>CryptoMessenger</name>
+                    <icon>src/main/resources/graphics/lock.${iconType}</icon>
+                    <vendor>Kirill</vendor>
+
+                    <!-- Windows -->
+                    <winDirChooser>true</winDirChooser>
+                    <winShortcutPrompt>true</winShortcutPrompt>
+                    <winShortcut>true</winShortcut>
+                    <winMenu>true</winMenu>
+                    <winMenuGroup>Kirill</winMenuGroup>
+                </configuration>
             </plugin>
         </plugins>
     </build>

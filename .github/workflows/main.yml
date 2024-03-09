@@ -1,0 +1,60 @@
+on:
+  - push
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      - uses: actions/checkout@v2
+      - run: docker compose up -d mongo
+        working-directory: docker
+      - run: ./mvnw verify
+  deploy:
+    if: github.ref_name == 'main'
+    needs: qa
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./mvnw package -DskipTests
+      - run: cp crypto-messenger-server/target/*.jar docker/
+      - run: docker compose -p crypto-messenger up -d --build
+        working-directory: docker
+  build-for-debian:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      - uses: actions/checkout@v2
+      - run: ./mvnw install -DskipTests
+      - uses: actions/upload-artifact@v3
+        with:
+          name: debian-${{ github.run_id }}
+          path: crypto-messenger-desktop/target/*.deb
+  build-for-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      - uses: actions/checkout@v2
+      - run: ./mvnw install -DiconType=ico -DskipTests
+      - uses: actions/upload-artifact@v3
+        with:
+          name: windows-${{ github.run_id }}
+          path: crypto-messenger-desktop/target/*.exe
+  build-for-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      - uses: actions/checkout@v2
+      - run: ./mvnw install -DskipTests
+      - uses: actions/upload-artifact@v3
+        with:
+          name: macos-${{ github.run_id }}
+          path: crypto-messenger-desktop/target/*.dmg

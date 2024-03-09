@@ -19,7 +19,7 @@ public class SendMessageDialog {
     public void show(Runnable onSuccess) {
         var stage = new Stage();
         stage.setTitle("Send Message");
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("/graphics/lock.jpg")));
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/graphics/lock.png")));
         stage.initModality(Modality.APPLICATION_MODAL);
         var sceneProperties = SceneProperties.of(
                 entry("onSent", (Runnable) () -> {

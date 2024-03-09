@@ -23,7 +23,7 @@ public class JavaFxApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("CryptoMessenger");
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/graphics/lock.jpg")));
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/graphics/lock.png")));
         primaryStage.setScene(sceneLoader.load("MainScene"));
         primaryStage.show();
     }
