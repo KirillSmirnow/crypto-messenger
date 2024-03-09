@@ -2,6 +2,7 @@ package cryptomessenger.desktop.infrastructure.ui.dialog;
 
 import cryptomessenger.desktop.infrastructure.ui.SceneLoader;
 import cryptomessenger.desktop.infrastructure.ui.SceneProperties;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class SendMessageDialog {
     public void show(Runnable onSuccess) {
         var stage = new Stage();
         stage.setTitle("Send Message");
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/graphics/lock.jpg")));
         stage.initModality(Modality.APPLICATION_MODAL);
         var sceneProperties = SceneProperties.of(
                 entry("onSent", (Runnable) () -> {

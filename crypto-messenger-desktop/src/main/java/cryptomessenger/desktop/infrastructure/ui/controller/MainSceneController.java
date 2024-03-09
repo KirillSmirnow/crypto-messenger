@@ -5,6 +5,7 @@ import cryptomessenger.desktop.infrastructure.ui.dialog.SendMessageDialog;
 import cryptomessenger.desktop.service.message.Message;
 import cryptomessenger.desktop.service.message.MessageService;
 import cryptomessenger.desktop.service.user.UserService;
+import cryptomessenger.desktop.utility.ThreadFactories;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TableView;
@@ -13,6 +14,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -26,11 +31,14 @@ public class MainSceneController implements Refreshable {
     public TableView<Message> inboxTable;
     public TableView<Message> outboxTable;
 
+    private ScheduledExecutorService executor;
+
     @Override
     public void refresh() {
         usernameField.setText(userService.getCurrentUsername());
         refreshInboxTable();
         refreshOutboxTable();
+        configureAutoRefresh();
     }
 
     private void refreshInboxTable() {
@@ -51,6 +59,13 @@ public class MainSceneController implements Refreshable {
         outboxTable.setItems(FXCollections.observableArrayList(
                 messageService.getOutbox(Pageable.ofSize(100).withPage(0)).getContent()
         ));
+    }
+
+    private void configureAutoRefresh() {
+        if (executor == null) {
+            executor = Executors.newScheduledThreadPool(1, ThreadFactories.daemon());
+            executor.scheduleWithFixedDelay(this::refreshInboxTable, 1, 1, TimeUnit.SECONDS);
+        }
     }
 
     public void onRegister(ActionEvent actionEvent) {
