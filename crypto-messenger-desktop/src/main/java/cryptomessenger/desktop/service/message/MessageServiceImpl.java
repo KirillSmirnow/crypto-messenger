@@ -13,6 +13,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
+
+import static java.time.ZoneOffset.UTC;
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
@@ -34,11 +40,21 @@ public class MessageServiceImpl implements MessageService {
                         .contentForReceiver(coder.encode(text::getBytes, receiver::getPublicKey).getBytes())
                         .build()
         );
+        addContact(receiverUsername);
     }
 
     private UserDto getCurrentUser() {
         var currentUsername = localStorage.getString(LocalStorageKeys.CURRENT_USERNAME);
         return userClient.getByUsername(currentUsername);
+    }
+
+    private void addContact(String newContact) {
+        var contacts = localStorage.getStrings(LocalStorageKeys.CONTACTS).stream()
+                .filter(not(String::isEmpty))
+                .filter(not(contact -> contact.equals(newContact)))
+                .collect(toList());
+        contacts.add(0, newContact);
+        localStorage.save(LocalStorageKeys.CONTACTS, contacts);
     }
 
     @Override
@@ -65,7 +81,7 @@ public class MessageServiceImpl implements MessageService {
         var sender = userClient.getById(dto.getSenderId());
         var receiver = userClient.getById(dto.getReceiverId());
         return Message.builder()
-                .sentAt(dto.getSentAt())
+                .sentAt(dto.getSentAt().atZone(UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime())
                 .senderUsername(sender.getUsername())
                 .receiverUsername(receiver.getUsername())
                 .text(decodeText(dto))

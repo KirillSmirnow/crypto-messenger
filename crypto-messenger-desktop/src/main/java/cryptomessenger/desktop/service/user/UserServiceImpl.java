@@ -32,6 +32,5 @@ public class UserServiceImpl implements UserService {
         );
         localStorage.save(LocalStorageKeys.CURRENT_USERNAME, username);
         localStorage.save(LocalStorageKeys.PRIVATE_KEY, keyPair.getPrivateKey().getBytes());
-        localStorage.save(LocalStorageKeys.PUBLIC_KEY, keyPair.getPublicKey().getBytes());
     }
 }

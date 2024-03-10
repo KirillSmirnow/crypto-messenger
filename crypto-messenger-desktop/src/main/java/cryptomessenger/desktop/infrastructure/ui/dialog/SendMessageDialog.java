@@ -17,11 +17,16 @@ public class SendMessageDialog {
     private final SceneLoader sceneLoader;
 
     public void show(Runnable onSuccess) {
+        show(null, onSuccess);
+    }
+
+    public void show(String receiverUsername, Runnable onSuccess) {
         var stage = new Stage();
         stage.setTitle("Send Message");
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/graphics/lock.png")));
         stage.initModality(Modality.APPLICATION_MODAL);
         var sceneProperties = SceneProperties.of(
+                entry("receiverUsername", receiverUsername == null ? "" : receiverUsername),
                 entry("onSent", (Runnable) () -> {
                     stage.close();
                     onSuccess.run();

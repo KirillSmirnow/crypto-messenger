@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Component
 public class LocalStorageImpl implements LocalStorage {
 
-    private final Path basePath = Path.of("./local-storage");
+    private final Path basePath = Path.of("CryptoMessengerStorage");
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @SneakyThrows

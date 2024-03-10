@@ -1,5 +1,6 @@
 package cryptomessenger.desktop.infrastructure.client.user;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,8 +13,10 @@ public interface UserClient {
     UserDto register(@RequestBody UserRegistrationDto registration);
 
     @GetMapping("/users")
+    @Cacheable("users")
     UserDto getByUsername(@RequestParam String username);
 
     @GetMapping("/users/{id}")
+    @Cacheable("users")
     UserDto getById(@PathVariable UUID id);
 }

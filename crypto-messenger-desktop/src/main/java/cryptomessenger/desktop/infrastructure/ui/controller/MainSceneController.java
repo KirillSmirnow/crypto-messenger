@@ -8,16 +8,21 @@ import cryptomessenger.desktop.service.user.UserService;
 import cryptomessenger.desktop.utility.ThreadFactories;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Button;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
@@ -28,37 +33,43 @@ public class MainSceneController implements Refreshable {
     private final SendMessageDialog sendMessageDialog;
 
     public TextField usernameField;
+    public Button registerButton;
     public TableView<Message> inboxTable;
     public TableView<Message> outboxTable;
+    public Pagination inboxTablePagination;
+    public Pagination outboxTablePagination;
 
     private ScheduledExecutorService executor;
 
     @Override
     public void refresh() {
-        usernameField.setText(userService.getCurrentUsername());
+        var username = userService.getCurrentUsername();
+        usernameField.setText(username);
+        usernameField.setDisable(!username.isEmpty());
+        registerButton.setVisible(username.isEmpty());
         refreshInboxTable();
         refreshOutboxTable();
         configureAutoRefresh();
     }
 
     private void refreshInboxTable() {
-        var columns = inboxTable.getColumns();
-        columns.get(0).setCellValueFactory(new PropertyValueFactory<>("senderUsername"));
-        columns.get(1).setCellValueFactory(new PropertyValueFactory<>("sentAt"));
-        columns.get(2).setCellValueFactory(new PropertyValueFactory<>("text"));
-        inboxTable.setItems(FXCollections.observableArrayList(
-                messageService.getInbox(Pageable.ofSize(100).withPage(0)).getContent()
-        ));
+        TableConfigurer.builder()
+                .table(inboxTable)
+                .pagination(inboxTablePagination)
+                .recipientField("senderUsername")
+                .messagesProvider(messageService::getInbox)
+                .build()
+                .configure();
     }
 
     private void refreshOutboxTable() {
-        var columns = outboxTable.getColumns();
-        columns.get(0).setCellValueFactory(new PropertyValueFactory<>("receiverUsername"));
-        columns.get(1).setCellValueFactory(new PropertyValueFactory<>("sentAt"));
-        columns.get(2).setCellValueFactory(new PropertyValueFactory<>("text"));
-        outboxTable.setItems(FXCollections.observableArrayList(
-                messageService.getOutbox(Pageable.ofSize(100).withPage(0)).getContent()
-        ));
+        TableConfigurer.builder()
+                .table(outboxTable)
+                .pagination(outboxTablePagination)
+                .recipientField("receiverUsername")
+                .messagesProvider(messageService::getOutbox)
+                .build()
+                .configure();
     }
 
     private void configureAutoRefresh() {
@@ -79,5 +90,36 @@ public class MainSceneController implements Refreshable {
 
     public void onRefresh(ActionEvent actionEvent) {
         refresh();
+    }
+
+    public void onReply(ActionEvent actionEvent) {
+        var selectedMessage = inboxTable.getSelectionModel().getSelectedItem();
+        var receiverUsername = selectedMessage == null ? null : selectedMessage.getSenderUsername();
+        sendMessageDialog.show(receiverUsername, this::refresh);
+    }
+
+    @Builder
+    private static class TableConfigurer {
+
+        private final TableView<Message> table;
+        private final Pagination pagination;
+        private final String recipientField;
+        private final Function<Pageable, Page<Message>> messagesProvider;
+
+        public void configure() {
+            configureColumns();
+            var messages = messagesProvider.apply(Pageable.ofSize(25).withPage(pagination.getCurrentPageIndex()));
+            pagination.setPageCount(messages.getTotalPages());
+            pagination.setVisible(messages.getTotalPages() > 0);
+            table.setItems(FXCollections.observableArrayList(messages.getContent()));
+        }
+
+        private void configureColumns() {
+            var columns = table.getColumns();
+            columns.get(0).setCellValueFactory(new PropertyValueFactory<>(recipientField));
+            columns.get(1).setCellValueFactory(new PropertyValueFactory<>("sentAt"));
+            columns.get(2).setCellValueFactory(new PropertyValueFactory<>("text"));
+            columns.get(2).prefWidthProperty().bind(table.widthProperty().subtract(420));
+        }
     }
 }

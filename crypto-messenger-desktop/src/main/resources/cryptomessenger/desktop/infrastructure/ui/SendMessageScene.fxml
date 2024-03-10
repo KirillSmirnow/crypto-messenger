@@ -5,14 +5,14 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER_LEFT" prefHeight="500.0" prefWidth="1000.0"
-      spacing="10.0" xmlns="http://javafx.com/javafx/17.0.2-ea"
+<VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="450.0" prefWidth="1000.0" spacing="10.0"
+      xmlns="http://javafx.com/javafx/17.0.2-ea"
       fx:controller="cryptomessenger.desktop.infrastructure.ui.controller.SendMessageSceneController">
     <children>
         <HBox alignment="CENTER_LEFT" spacing="10.0">
             <children>
                 <Label text="To:"/>
-                <TextField fx:id="receiverField" prefWidth="300.0"/>
+                <ComboBox fx:id="receiverSelector" editable="true" prefWidth="300.0" promptText="username"/>
             </children>
             <VBox.margin>
                 <Insets/>

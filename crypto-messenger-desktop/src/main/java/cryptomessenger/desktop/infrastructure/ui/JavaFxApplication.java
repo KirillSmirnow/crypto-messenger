@@ -25,6 +25,8 @@ public class JavaFxApplication extends Application {
         primaryStage.setTitle("CryptoMessenger");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/graphics/lock.png")));
         primaryStage.setScene(sceneLoader.load("MainScene"));
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(700);
         primaryStage.show();
     }
 }
