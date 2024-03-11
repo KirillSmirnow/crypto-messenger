@@ -1,4 +1,5 @@
 app:
+  version: @project.version@
   server-base-url: http://164.90.184.120
 spring:
   main:

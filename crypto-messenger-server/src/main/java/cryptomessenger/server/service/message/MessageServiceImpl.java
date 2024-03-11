@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
@@ -15,6 +16,7 @@ import static java.util.UUID.randomUUID;
 public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
+    private final Set<NewMessageListener> newMessageListeners;
 
     @Override
     public Message send(MessageSending sending) {
@@ -26,7 +28,9 @@ public class MessageServiceImpl implements MessageService {
                 .contentForSender(sending.getContentForSender())
                 .contentForReceiver(sending.getContentForReceiver())
                 .build();
-        return messageRepository.save(message);
+        messageRepository.save(message);
+        newMessageListeners.forEach(listener -> listener.onNewMessage(message));
+        return message;
     }
 
     @Override

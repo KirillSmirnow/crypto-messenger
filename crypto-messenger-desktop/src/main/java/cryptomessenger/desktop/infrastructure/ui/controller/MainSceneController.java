@@ -1,10 +1,13 @@
 package cryptomessenger.desktop.infrastructure.ui.controller;
 
+import cryptomessenger.desktop.infrastructure.client.websocket.WebSocketManager;
+import cryptomessenger.desktop.infrastructure.client.websocket.handler.NewMessageHandler;
 import cryptomessenger.desktop.infrastructure.ui.Refreshable;
 import cryptomessenger.desktop.infrastructure.ui.dialog.SendMessageDialog;
 import cryptomessenger.desktop.service.message.Message;
 import cryptomessenger.desktop.service.message.MessageService;
 import cryptomessenger.desktop.service.user.UserService;
+import cryptomessenger.desktop.utility.Player;
 import cryptomessenger.desktop.utility.ThreadFactories;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -19,6 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.net.URL;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +36,8 @@ public class MainSceneController implements Refreshable {
     private final UserService userService;
     private final MessageService messageService;
     private final SendMessageDialog sendMessageDialog;
+    private final NewMessageHandler newMessageHandler;
+    private final WebSocketManager webSocketManager;
 
     public TextField usernameField;
     public Button registerButton;
@@ -42,6 +49,12 @@ public class MainSceneController implements Refreshable {
     private ScheduledExecutorService executor;
 
     @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        refresh();
+        newMessageHandler.setOnNewMessage(() -> Player.playAudio("/sounds/new-message.mp3"));
+    }
+
+    @Override
     public void refresh() {
         var username = userService.getCurrentUsername();
         usernameField.setText(username);
@@ -50,6 +63,7 @@ public class MainSceneController implements Refreshable {
         refreshInboxTable();
         refreshOutboxTable();
         configureAutoRefresh();
+        webSocketManager.refreshSubscriptions();
     }
 
     private void refreshInboxTable() {
