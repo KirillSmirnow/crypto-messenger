@@ -1,8 +1,8 @@
 package cryptomessenger.desktop.service.user;
 
 import cryptomessenger.coder.Coder;
-import cryptomessenger.desktop.infrastructure.client.user.UserClient;
-import cryptomessenger.desktop.infrastructure.client.user.UserRegistrationDto;
+import cryptomessenger.desktop.infrastructure.client.feign.user.UserClient;
+import cryptomessenger.desktop.infrastructure.client.feign.user.UserRegistrationDto;
 import cryptomessenger.desktop.infrastructure.localstorage.LocalStorage;
 import cryptomessenger.desktop.service.LocalStorageKeys;
 import lombok.RequiredArgsConstructor;

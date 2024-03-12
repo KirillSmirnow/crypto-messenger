@@ -1,4 +1,4 @@
-package cryptomessenger.desktop.infrastructure.client.user;
+package cryptomessenger.desktop.infrastructure.client.feign.user;
 
 import lombok.Data;
 

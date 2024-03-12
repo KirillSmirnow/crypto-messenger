@@ -1,4 +1,4 @@
-package cryptomessenger.desktop.infrastructure.client.message;
+package cryptomessenger.desktop.infrastructure.client.feign.message;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;

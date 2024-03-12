@@ -1,4 +1,4 @@
-package cryptomessenger.desktop.infrastructure.client.user;
+package cryptomessenger.desktop.infrastructure.client.feign.user;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;

@@ -1,11 +1,11 @@
 package cryptomessenger.desktop.service.message;
 
 import cryptomessenger.coder.Coder;
-import cryptomessenger.desktop.infrastructure.client.message.MessageClient;
-import cryptomessenger.desktop.infrastructure.client.message.MessageDto;
-import cryptomessenger.desktop.infrastructure.client.message.MessageSendingDto;
-import cryptomessenger.desktop.infrastructure.client.user.UserClient;
-import cryptomessenger.desktop.infrastructure.client.user.UserDto;
+import cryptomessenger.desktop.infrastructure.client.feign.message.MessageClient;
+import cryptomessenger.desktop.infrastructure.client.feign.message.MessageDto;
+import cryptomessenger.desktop.infrastructure.client.feign.message.MessageSendingDto;
+import cryptomessenger.desktop.infrastructure.client.feign.user.UserClient;
+import cryptomessenger.desktop.infrastructure.client.feign.user.UserDto;
 import cryptomessenger.desktop.infrastructure.localstorage.LocalStorage;
 import cryptomessenger.desktop.service.LocalStorageKeys;
 import lombok.RequiredArgsConstructor;

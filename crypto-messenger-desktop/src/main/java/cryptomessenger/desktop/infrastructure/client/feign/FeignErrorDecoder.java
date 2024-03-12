@@ -1,4 +1,4 @@
-package cryptomessenger.desktop.infrastructure.client;
+package cryptomessenger.desktop.infrastructure.client.feign;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;
