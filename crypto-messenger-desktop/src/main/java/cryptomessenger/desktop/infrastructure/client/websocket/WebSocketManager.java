@@ -54,11 +54,18 @@ public class WebSocketManager {
     }
 
     public void refreshSubscriptions() {
-        subscriptions.forEach(Subscription::unsubscribe);
+        subscriptions.forEach(this::unsubscribe);
         subscriptions = messageHandlers.stream()
                 .map(this::subscribe)
                 .flatMap(Optional::stream)
                 .collect(toSet());
+    }
+
+    private void unsubscribe(Subscription subscription) {
+        try {
+            subscription.unsubscribe();
+        } catch (Exception e) {
+        }
     }
 
     private Optional<Subscription> subscribe(MessageHandler handler) {
