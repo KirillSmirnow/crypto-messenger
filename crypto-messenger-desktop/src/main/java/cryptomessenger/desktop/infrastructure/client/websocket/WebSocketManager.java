@@ -1,7 +1,9 @@
 package cryptomessenger.desktop.infrastructure.client.websocket;
 
 import cryptomessenger.desktop.infrastructure.client.websocket.handler.MessageHandler;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -18,6 +20,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -31,42 +34,60 @@ public class WebSocketManager {
 
     private final Set<MessageHandler> messageHandlers;
 
+    private final WebSocketStompClient client = new WebSocketStompClient(new StandardWebSocketClient());
+    private StompSession session = null;
+    private Set<Subscription> subscriptions = emptySet();
+
     @Value("${app.server-base-url}")
     private String serverBaseUrl;
 
-    private StompSession session;
-    private Set<Subscription> subscriptions = emptySet();
+    @PostConstruct
+    private void initialize() {
+        client.setMessageConverter(new StringMessageConverter(StandardCharsets.UTF_8));
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     private void connect() {
-        var client = new WebSocketStompClient(new StandardWebSocketClient());
-        client.setMessageConverter(new StringMessageConverter(StandardCharsets.UTF_8));
-        client.connectAsync(getConnectionUrl(), new SessionHandler())
-                .thenAccept(establishedSession -> {
-                    log.info("Connection established");
-                    session = establishedSession;
-                    refreshSubscriptions();
-                });
-    }
-
-    private String getConnectionUrl() {
-        return serverBaseUrl.replaceFirst("http", "ws") + "/ws";
+        var url = serverBaseUrl.replaceFirst("http", "ws") + "/ws";
+        client.connectAsync(url, new SessionHandler(this::connect)).thenAccept(establishedSession -> {
+            log.info("Session established");
+            session = establishedSession;
+            refreshSubscriptions();
+        });
     }
 
     public void refreshSubscriptions() {
         subscriptions.forEach(Subscription::unsubscribe);
-        subscriptions = messageHandlers.stream().map(handler -> {
-            var destination = handler.getDestination();
-            var subscription = session.subscribe(destination, new FrameHandler(handler.getHandler()));
-            log.info("Subscribed to {}", destination);
-            return subscription;
-        }).collect(toSet());
+        subscriptions = messageHandlers.stream()
+                .map(this::subscribe)
+                .flatMap(Optional::stream)
+                .collect(toSet());
     }
 
+    private Optional<Subscription> subscribe(MessageHandler handler) {
+        var handlerName = handler.getClass().getSimpleName();
+        try {
+            var destination = handler.getDestination();
+            var subscription = session.subscribe(destination, new FrameHandler(handler.getHandler()));
+            log.info("Subscribed {} to {}", handlerName, destination);
+            return Optional.of(subscription);
+        } catch (Exception e) {
+            log.warn("Failed to subscribe {}: {}", handlerName, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    @RequiredArgsConstructor
     private static class SessionHandler extends StompSessionHandlerAdapter {
+
+        private final Runnable onDisconnected;
+
         @Override
+        @SneakyThrows
         public void handleTransportError(StompSession session, Throwable exception) {
             log.warn("Transport error: {}", exception.getMessage());
+            Thread.sleep(5000);
+            onDisconnected.run();
         }
     }
 
