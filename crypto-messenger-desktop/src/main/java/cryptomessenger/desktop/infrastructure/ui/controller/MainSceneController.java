@@ -9,13 +9,12 @@ import cryptomessenger.desktop.service.message.MessageService;
 import cryptomessenger.desktop.service.user.UserService;
 import cryptomessenger.desktop.utility.Player;
 import cryptomessenger.desktop.utility.ThreadFactories;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Pagination;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.paint.Color;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,19 +38,28 @@ public class MainSceneController implements Refreshable {
     private final NewMessageHandler newMessageHandler;
     private final WebSocketManager webSocketManager;
 
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1, ThreadFactories.daemon());
+
     public TextField usernameField;
     public Button registerButton;
     public TableView<Message> inboxTable;
     public TableView<Message> outboxTable;
     public Pagination inboxTablePagination;
     public Pagination outboxTablePagination;
-
-    private ScheduledExecutorService executor;
+    public Label statusLabel;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         refresh();
+        configureAutoRefresh();
         newMessageHandler.setOnNewMessage(() -> Player.playAudio("/sounds/new-message.mp3"));
+    }
+
+    private void configureAutoRefresh() {
+        executor.scheduleWithFixedDelay(() -> Platform.runLater(() -> {
+            refreshInboxTable();
+            refreshStatusLabel();
+        }), 1, 1, TimeUnit.SECONDS);
     }
 
     @Override
@@ -62,7 +70,7 @@ public class MainSceneController implements Refreshable {
         registerButton.setVisible(username.isEmpty());
         refreshInboxTable();
         refreshOutboxTable();
-        configureAutoRefresh();
+        refreshStatusLabel();
         webSocketManager.refreshSubscriptions();
     }
 
@@ -86,11 +94,14 @@ public class MainSceneController implements Refreshable {
                 .configure();
     }
 
-    private void configureAutoRefresh() {
-        if (executor == null) {
-            executor = Executors.newScheduledThreadPool(1, ThreadFactories.daemon());
-            executor.scheduleWithFixedDelay(this::refreshInboxTable, 1, 1, TimeUnit.SECONDS);
-        }
+    private void refreshStatusLabel() {
+        webSocketManager.getSessionId().ifPresentOrElse(sessionId -> {
+            statusLabel.setTextFill(Color.GREEN);
+            statusLabel.setText("WS connected: %s".formatted(sessionId));
+        }, () -> {
+            statusLabel.setTextFill(Color.RED);
+            statusLabel.setText("WS disconnected");
+        });
     }
 
     public void onRegister(ActionEvent actionEvent) {

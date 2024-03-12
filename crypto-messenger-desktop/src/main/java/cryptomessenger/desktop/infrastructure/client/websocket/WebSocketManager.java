@@ -74,6 +74,10 @@ public class WebSocketManager {
         }
     }
 
+    public Optional<String> getSessionId() {
+        return Optional.ofNullable(session == null || !session.isConnected() ? null : session.getSessionId());
+    }
+
     @RequiredArgsConstructor
     private static class SessionHandler extends StompSessionHandlerAdapter {
 
