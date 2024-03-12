@@ -9,11 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.converter.StringMessageConverter;
-import org.springframework.messaging.simp.stomp.StompFrameHandler;
-import org.springframework.messaging.simp.stomp.StompHeaders;
-import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.*;
 import org.springframework.messaging.simp.stomp.StompSession.Subscription;
-import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -81,6 +78,11 @@ public class WebSocketManager {
     private static class SessionHandler extends StompSessionHandlerAdapter {
 
         private final Runnable onDisconnected;
+
+        @Override
+        public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
+            log.warn("Exception: {}", exception.getMessage());
+        }
 
         @Override
         @SneakyThrows
