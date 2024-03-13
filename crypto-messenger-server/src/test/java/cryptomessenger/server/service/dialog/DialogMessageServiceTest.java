@@ -37,6 +37,9 @@ class DialogMessageServiceTest {
         assertThat(dialog).hasSize(2);
         assertThat(dialog.getContent().get(0).getMessage()).isEqualTo(message2);
         assertThat(dialog.getContent().get(1).getMessage()).isEqualTo(message1);
+
+        assertThat(dialog.getContent().get(0).isMine()).isFalse();
+        assertThat(dialog.getContent().get(1).isMine()).isTrue();
     }
 
     private Message saveMessage(UUID senderId, UUID receiverId) {
