@@ -2,6 +2,7 @@ package cryptomessenger.server.service.dialog;
 
 import cryptomessenger.server.service.message.Message;
 import cryptomessenger.server.service.message.MessageRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -24,8 +25,13 @@ class DialogMessageServiceTest {
     @Autowired
     private DialogMessageService dialogMessageService;
 
+    @BeforeEach
+    public void setUp() {
+        messageRepository.deleteAll();
+    }
+
     @Test
-    public void givenMessageSending_whenGetDialogMessages_thenReturnsCorrectDialog() {
+    public void givenMessages_whenGetDialogMessages_thenReturnsCorrectDialog() {
         var userId = randomUUID();
         var otherUserId = randomUUID();
         var message1 = saveMessage(userId, otherUserId);
@@ -40,6 +46,18 @@ class DialogMessageServiceTest {
 
         assertThat(dialog.getContent().get(0).isMine()).isFalse();
         assertThat(dialog.getContent().get(1).isMine()).isTrue();
+    }
+
+    @Test
+    public void givenMessageFromUserToHimSelf_whenGetDialogMessages_thenReturnsOnlyOneDialogMessage() {
+        var userId = randomUUID();
+        saveMessage(userId, userId);
+        saveMessage(randomUUID(), randomUUID());
+
+        var dialog = dialogMessageService.getDialogMessagesFor(userId, userId, Pageable.unpaged());
+
+        assertThat(dialog).hasSize(1);
+        assertThat(dialog.getContent().get(0).isMine()).isTrue();
     }
 
     private Message saveMessage(UUID senderId, UUID receiverId) {
