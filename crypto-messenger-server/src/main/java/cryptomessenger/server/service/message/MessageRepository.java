@@ -18,6 +18,9 @@ public interface MessageRepository extends MongoRepository<Message, UUID> {
     Page<Message> findBySenderIdAndReceiverIdOrderBySentAtDesc(UUID senderId, UUID receiverId, Pageable pageable);
 
     default Page<Message> findMessagesBetween(UUID userId, UUID otherUserId, Pageable pageable) {
+        if (userId.equals(otherUserId)) {
+            return findBySenderIdOrderBySentAtDesc(userId, pageable);
+        }
         var fromUserToOtherUser = findBySenderIdAndReceiverIdOrderBySentAtDesc(userId, otherUserId, pageable);
         var fromOtherUserToUser = findBySenderIdAndReceiverIdOrderBySentAtDesc(otherUserId, userId, pageable);
         var combinedMessages = Stream.concat(fromUserToOtherUser.stream(), fromOtherUserToUser.stream())
