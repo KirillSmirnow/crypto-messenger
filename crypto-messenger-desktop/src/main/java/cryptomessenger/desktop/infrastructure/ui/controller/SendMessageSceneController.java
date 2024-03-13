@@ -1,6 +1,7 @@
 package cryptomessenger.desktop.infrastructure.ui.controller;
 
 import cryptomessenger.desktop.infrastructure.localstorage.LocalStorage;
+import cryptomessenger.desktop.infrastructure.ui.dialog.DialogWithOtherUserDialog;
 import cryptomessenger.desktop.service.LocalStorageKeys;
 import cryptomessenger.desktop.service.message.MessageService;
 import javafx.event.ActionEvent;
@@ -21,6 +22,7 @@ public class SendMessageSceneController implements Initializable {
 
     private final MessageService messageService;
     private final LocalStorage localStorage;
+    private final DialogWithOtherUserDialog dialogWithOtherUserDialog;
 
     public ComboBox<String> receiverSelector;
     public TextArea messageField;
@@ -47,6 +49,12 @@ public class SendMessageSceneController implements Initializable {
     }
 
     public void onCancel(ActionEvent actionEvent) {
+        onCancel.run();
+    }
+
+    public void onOpenDialog(ActionEvent actionEvent) {
+        var otherUser = receiverSelector.getValue();
+        dialogWithOtherUserDialog.show(otherUser);
         onCancel.run();
     }
 }
