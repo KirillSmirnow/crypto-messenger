@@ -60,6 +60,7 @@ public class DialogSceneController implements Refreshable {
     public void onSend(ActionEvent actionEvent) {
         messageService.send(username, messageField.getText());
         refreshMessagesTable();
+        messageField.clear();
     }
 
     private void configureTable() {
