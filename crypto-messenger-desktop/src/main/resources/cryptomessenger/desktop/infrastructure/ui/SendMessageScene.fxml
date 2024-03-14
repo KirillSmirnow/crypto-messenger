@@ -37,6 +37,11 @@
                         <Font size="18.0"/>
                     </font>
                 </Button>
+                <Button onAction="#onOpenDialog" text="Open Dialog">
+                    <font>
+                        <Font size="18.0"/>
+                    </font>
+                </Button>
             </children>
         </HBox>
     </children>
