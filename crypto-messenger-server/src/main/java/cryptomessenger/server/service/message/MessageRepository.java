@@ -1,13 +1,11 @@
 package cryptomessenger.server.service.message;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
-import java.util.Comparator;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public interface MessageRepository extends MongoRepository<Message, UUID> {
 
@@ -17,15 +15,12 @@ public interface MessageRepository extends MongoRepository<Message, UUID> {
 
     Page<Message> findBySenderIdAndReceiverIdOrderBySentAtDesc(UUID senderId, UUID receiverId, Pageable pageable);
 
-    default Page<Message> findMessagesBetween(UUID userId, UUID otherUserId, Pageable pageable) {
-        if (userId.equals(otherUserId)) {
-            return findBySenderIdOrderBySentAtDesc(userId, pageable);
-        }
-        var fromUserToOtherUser = findBySenderIdAndReceiverIdOrderBySentAtDesc(userId, otherUserId, pageable);
-        var fromOtherUserToUser = findBySenderIdAndReceiverIdOrderBySentAtDesc(otherUserId, userId, pageable);
-        var combinedMessages = Stream.concat(fromUserToOtherUser.stream(), fromOtherUserToUser.stream())
-                .sorted(Comparator.comparing(Message::getSentAt).reversed())
-                .toList();
-        return new PageImpl<>(combinedMessages, pageable, combinedMessages.size());
-    }
+    @Query(value = """
+                { $or: [
+                    { $and: [{receiverId: ?0}, {senderId: ?1}]} , { $and: [{senderId: ?0}, {receiverId: ?1}]}
+                ]}
+            """,
+            sort = "{ sentAt : -1 }")
+    Page<Message> findMessagesBetween(UUID userId, UUID otherUserId, Pageable pageable);
+
 }

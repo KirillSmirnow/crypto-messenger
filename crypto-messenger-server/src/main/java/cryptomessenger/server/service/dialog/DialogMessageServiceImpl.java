@@ -21,7 +21,7 @@ public class DialogMessageServiceImpl implements DialogMessageService {
         var dialogs = messages.stream()
                 .map(message -> DialogMessage.builder()
                         .message(message)
-                        .isMine(message.getSenderId().equals(myId))
+                        .mine(message.getSenderId().equals(myId))
                         .build())
                 .toList();
         return new PageImpl<>(dialogs, pageable, dialogs.size());
